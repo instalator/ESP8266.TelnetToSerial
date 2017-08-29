@@ -1,9 +1,8 @@
 #include <ESP8266WiFi.h>
 
-//how many clients should be able to telnet to this ESP8266
-#define MAX_SRV_CLIENTS 1
+#define MAX_SRV_CLIENTS 3
 
-const char* ssid = "...";
+const char* ssid     = "...";
 const char* password = "...";
 
 IPAddress ip(192,168,1,55);
@@ -14,24 +13,13 @@ WiFiServer server(23);
 WiFiClient serverClients[MAX_SRV_CLIENTS];
 
 void setup() {
-  Serial1.begin(9600);
   WiFi.begin(ssid, password);
   WiFi.config(ip, gateway, subnet);
-  Serial1.print("\nConnecting to "); Serial1.println(ssid);
-  uint8_t i = 0;
-  while (WiFi.status() != WL_CONNECTED && i++ < 20) delay(500);
-  if(i == 21){
-    Serial1.print("Could not connect to"); Serial1.println(ssid);
-    while(1) delay(500);
-  }
+  while (WiFi.status() != WL_CONNECTED) delay(1000);
   //start UART and the server
   Serial.begin(9600);
   server.begin();
   server.setNoDelay(true);
-  
-  Serial1.print("Ready! Use 'telnet ");
-  Serial1.print(WiFi.localIP());
-  Serial1.println(" 23' to connect");
 }
 
 void loop() {
@@ -43,7 +31,6 @@ void loop() {
       if (!serverClients[i] || !serverClients[i].connected()){
         if(serverClients[i]) serverClients[i].stop();
         serverClients[i] = server.available();
-        Serial1.print("New client: "); Serial1.print(i);
         continue;
       }
     }
