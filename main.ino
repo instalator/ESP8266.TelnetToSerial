@@ -1,8 +1,9 @@
 #include <ESP8266WiFi.h>
 
 #define MAX_SRV_CLIENTS 3
+#define LED     12
 
-const char* ssid     = "...";
+const char* ssid = "...";
 const char* password = "...";
 
 IPAddress ip(192,168,1,55);
@@ -12,18 +13,35 @@ IPAddress subnet(255,255,255,0);
 WiFiServer server(23);
 WiFiClient serverClients[MAX_SRV_CLIENTS];
 
-void setup() {
-  WiFi.begin(ssid, password);
-  WiFi.config(ip, gateway, subnet);
-  while (WiFi.status() != WL_CONNECTED) delay(1000);
-  //start UART and the server
+void setup() {  
+  pinMode(LED, OUTPUT);
+  setup_wifi();
   Serial.begin(9600);
   server.begin();
   server.setNoDelay(true);
 }
 
+void setup_wifi() {
+  delay(10);
+  WiFi.begin(ssid, password);
+  WiFi.config(ip, gateway, subnet);
+  reconnect();
+}
+
+void reconnect() {
+  digitalWrite(LED, !digitalRead(LED));
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(200);
+    digitalWrite(LED, !digitalRead(LED));
+  }
+  digitalWrite(LED, HIGH);
+}
+
 void loop() {
   uint8_t i;
+  if(WiFi.status() != WL_CONNECTED){
+    reconnect();
+  }
   //check if there are any new clients
   if (server.hasClient()){
     for(i = 0; i < MAX_SRV_CLIENTS; i++){
