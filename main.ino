@@ -5,12 +5,8 @@
 #define MAX_SRV_CLIENTS 10
 #define LED     12
 
-const char* ssid = "...";
-const char* password = "..."; 
-
-IPAddress ip(127,0,0,1);
-IPAddress gateway(127,0,0,2);
-IPAddress subnet(255,255,255,0);
+const char* ssid = "****";
+const char* password = "****";
 
 WiFiServer server(23);
 WiFiClient serverClients[MAX_SRV_CLIENTS];
@@ -23,7 +19,7 @@ void setup() {
   Serial.begin(9600);
   server.begin();
   server.setNoDelay(true);
-  ArduinoOTA.setHostname("TelnetToSerial");
+  ArduinoOTA.setHostname("Haier");
   ArduinoOTA.onStart([]() {  });
   ArduinoOTA.onEnd([]() {  });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {  });
@@ -35,7 +31,6 @@ void setup_wifi() {
   delay(10);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  WiFi.config(ip, gateway, subnet);
   reconnect();
 }
 
@@ -44,6 +39,7 @@ void reconnect() {
   while (WiFi.status() != WL_CONNECTED) {
     cn++;
     delay(200);
+    ArduinoOTA.handle();
     digitalWrite(LED, !digitalRead(LED));
     if (cn > 200){ESP.restart();}
   }
